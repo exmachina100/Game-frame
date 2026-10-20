@@ -3,7 +3,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
-from gameframe.ioquake3_v2_source_patch import patch_client,patch_cgame,V2_CGAME_MARKER
+from gameframe.ioquake3_v2_source_patch import patch_client,patch_cgame,repair_checkout,V2_CGAME_MARKER
 from gameframe.ioquake3_source_patch import patch_source
 from gameframe.ioquake3_render_camera import IoQuake3RenderCamera
 
@@ -23,6 +23,21 @@ class RenderCameraTests(unittest.TestCase):
         self.assertIn("GF_CinematicView();",patched)
         with self.assertRaises(ValueError):
             patch_cgame(patched)
+
+    def test_existing_v2_cgame_can_be_repaired_for_qvm(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/"code/cgame/cg_view.c"
+            path.parent.mkdir(parents=True)
+            original="static int CG_CalcViewValues( void ) {return 0;}\\n\\tinwater = CG_CalcViewValues();"
+            patched=patch_cgame(original)
+            unguarded=patched.replace("#ifndef Q3_VM\\n","").replace("#endif /* !Q3_VM */\\n","").replace("\\n#endif","")
+            path.write_text(unguarded)
+            repair_checkout(Path(folder))
+            updated=path.read_text()
+            self.assertIn("#ifndef Q3_VM",updated)
+            self.assertIn("#endif /* !Q3_VM */",updated)
+            self.assertIn("GF_CinematicView();\\n#endif",updated)
+            self.assertEqual(repair_checkout(Path(folder)),path)
 
     def test_transport_roundtrip(self):
         with tempfile.TemporaryDirectory() as dir:
