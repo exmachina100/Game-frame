@@ -49,7 +49,12 @@ class MameBridge:
         try:
             while time.monotonic() < deadline:
                 if response_path.exists():
-                    response = json.loads(response_path.read_text(encoding="utf-8"))
+                    try:
+                        response = json.loads(response_path.read_text(encoding="utf-8"))
+                    except (json.JSONDecodeError, PermissionError, OSError):
+                        # Older bridge versions can expose a file before writing completes.
+                        time.sleep(0.02)
+                        continue
                     if response.get("id") != request_id:
                         raise ValueError("Bridge response ID mismatch")
                     if not response.get("ok", False):
@@ -58,5 +63,9 @@ class MameBridge:
                 time.sleep(0.02)
             raise TimeoutError("MAME did not respond; verify -autoboot_script and bridge directory")
         finally:
-            request_path.unlink(missing_ok=True)
-            response_path.unlink(missing_ok=True)
+            for path in (request_path, response_path):
+                try:
+                    path.unlink(missing_ok=True)
+                except PermissionError:
+                    # Windows can still hold a handle briefly after Lua closes it.
+                    pass
