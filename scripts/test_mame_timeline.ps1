@@ -10,6 +10,7 @@ $stdout=Join-Path $dir "stdout.log"
 $stderr=Join-Path $dir "stderr.log"
 $proc=$null
 $manifest=Join-Path $root "output\pong_timeline_manifest.json"
+if ($Record) { $manifest=Join-Path $root "output\pong_record_manifest.json" }
 try {
   $arguments="pong -autoboot_script `"$lua`" -autoboot_delay 1 -window -verbose"
   $proc=Start-Process -FilePath $MameExe -ArgumentList $arguments -WorkingDirectory (Split-Path $MameExe) -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
@@ -39,6 +40,8 @@ if sys.argv[4]=="1":
 '@ | python - $dir $TimeoutSeconds $manifest $recordFlag
   $code=$LASTEXITCODE
   if ($code -ne 0) {
+    Write-Host "Manifest: $manifest" -ForegroundColor Yellow
+    if (Test-Path $manifest) { Get-Content $manifest }
     if (Test-Path $stdout) { Get-Content $stdout -Tail 30 }
     if (Test-Path $stderr) { Get-Content $stderr -Tail 30 }
     throw "Pong timeline failed (Python $code)"
