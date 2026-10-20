@@ -46,8 +46,15 @@ def run_until_frames(bridge, target_frames: int, *, timeout: float = 8.0,
             if deltas and all(delta >= target_frames for delta in deltas.values()):
                 break
             time.sleep(poll_seconds)
-    finally:
-        # Never leave MAME running when polling errors or times out.
+    except Exception as original:
+        # A failed pause is a second problem, not a replacement for the error
+        # that caused the run to abort. The timeline will retry cleanup.
+        try:
+            bridge.request("pause")
+        except Exception as cleanup:
+            original.add_note(f"MAME pause cleanup also failed: {cleanup}")
+        raise
+    else:
         bridge.request("pause")
     latest = bridge.request("status")["info"]
     current = _frames(latest)
