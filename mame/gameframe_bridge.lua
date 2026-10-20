@@ -9,25 +9,35 @@ local processed = {}
 
 local function frame_counter()
     local frames = {}
-    for tag, screen in pairs(manager.machine.screens) do
-        frames[tostring(tag)] = screen.frame_number
-    end
+    local ok, screens = pcall(function() return manager.machine.screens end)
+    if not ok or not screens then return frames end
+    pcall(function()
+        for tag, screen in pairs(screens) do
+            local good, count = pcall(function() return screen.frame_number end)
+            if good and type(count) == "number" then frames[tostring(tag)] = count end
+        end
+    end)
     return frames
 end
 
 local function input_catalog()
     local ports = {}
     local count = 0
-    for tag, port in pairs(manager.machine.ioport.ports) do
-        local fields = {}
-        for name, field in pairs(port.fields) do
-            fields[#fields + 1] = {name = tostring(name), player = field.player,
-                mask = field.mask, analog = field.minvalue ~= nil}
+    local ok, allports = pcall(function() return manager.machine.ioport.ports end)
+    if not ok or not allports then return ports end
+    pcall(function()
+        for tag, port in pairs(allports) do
+            local fields = {}
+            pcall(function()
+                for name, field in pairs(port.fields) do
+                    fields[#fields + 1] = {name = tostring(name)}
+                end
+            end)
+            ports[#ports + 1] = {tag = tostring(tag), fields = fields}
+            count = count + 1
+            if count >= 64 then break end
         end
-        ports[#ports + 1] = {tag = tostring(tag), fields = fields}
-        count = count + 1
-        if count >= 64 then break end
-    end
+    end)
     return ports
 end
 
