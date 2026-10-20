@@ -42,7 +42,7 @@ CLIENT_BRANCH=r'''
 '''
 # Use explicit C string escaping because branch is embedded in Python raw string.
 CGAME_HOOK=r'''
-/* GAMEFRAME_V2_CGAME: renderer-only detached viewpoint. */
+/* GAMEFRAME_V2_CGAME */\n/* renderer-only detached viewpoint. */
 static void GF_CinematicView(void) {
     char flag[16];
     char pose[256];
