@@ -1,0 +1,53 @@
+{
+  "name": "Arena opening — 12-second camera study",
+  "keyframes": [
+    {
+      "time": 0,
+      "position": [
+        212,
+        2360,
+        56
+      ],
+      "pitch": 0,
+      "yaw": 0,
+      "roll": 0,
+      "fov": 85
+    },
+    {
+      "time": 4,
+      "position": [
+        212,
+        2360,
+        56
+      ],
+      "pitch": -8,
+      "yaw": 60,
+      "roll": 0,
+      "fov": 70
+    },
+    {
+      "time": 8,
+      "position": [
+        212,
+        2360,
+        56
+      ],
+      "pitch": 10,
+      "yaw": 120,
+      "roll": 12,
+      "fov": 55
+    },
+    {
+      "time": 12,
+      "position": [
+        212,
+        2360,
+        56
+      ],
+      "pitch": 0,
+      "yaw": 180,
+      "roll": 0,
+      "fov": 85
+    }
+  ]
+}
