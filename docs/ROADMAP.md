@@ -23,6 +23,8 @@ GameFrame directs cinematic scenes through native game engines, using an engine-
 - [x] ioquake3 planning/diagnostics adapter with **zero claimed executable operations**
 - [x] Capability-aware example cinematic plan; fails validation until controls exist
 - [ ] Identify valid executable and legal local engine/data installation
+- [x] Add manual Quake III native console camera-placement and capture smoke-test generators (not RPC)
+- [ ] Verify `setviewpos` and native screenshot/demo capture on the user's running engine
 - [ ] Build and verify game-side camera bridge and scene state inspection
 - [ ] Add stage/actor transform controls with documented limitations
 - [ ] Implement repeatable multi-shot timeline and native frame/video capture
@@ -46,6 +48,9 @@ GameFrame directs cinematic scenes through native game engines, using an engine-
 - No game executable, ROM or proprietary asset is bundled.
 - Cinematic plans should fail early when adapters lack requested operations.
 - Prefer thin engine adapters and reusable director/shot semantics over game-specific main UI.
+
+## Camera pilot
+See [ioquake3 camera pilot](IOQUAKE3_CAMERA_PILOT.md). The console cfg exporter does not imply native camera RPC or frame-accurate automation.
 
 ## Developer commands
 ```powershell
