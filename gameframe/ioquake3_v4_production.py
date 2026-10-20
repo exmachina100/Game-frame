@@ -65,7 +65,7 @@ def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=
     status="completed"
     try:
         for shot in production.shots:
-            kw={"rate":rate,"live":live,"allow_translation":allow_translation}
+            kw={"rate":rate,"live":live,"allow_translation":allow_translation,"reset_after":False}
             if clock is not None: kw["clock"]=clock
             if sleep is not None: kw["sleep"]=sleep
             manifest=run_take(shot,bridge,**kw)
@@ -78,6 +78,10 @@ def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=
     except BaseException:
         status="failed_or_interrupted"
         raise
+    finally:
+        if live and bridge is not None:
+            try: bridge.reset()
+            except Exception: pass
     return {"schema":"gameframe.v4.production.v1","name":production.name,"status":status,
             "mode":"live" if live else "dry_run","shots":manifests,
             "frame_accurate":False,"capture_files_verified":False}
