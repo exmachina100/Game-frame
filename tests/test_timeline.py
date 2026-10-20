@@ -38,8 +38,9 @@ class TimelineTests(unittest.TestCase):
                 return super().request(action, **kwargs)
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / "failed.json"
+            bridge = BrokenRecorder()
             with self.assertRaisesRegex(TimeoutError, "stalled recorder"):
-                play_timeline(BrokenRecorder(), [Beat("test", 10, 128, 128)], record=True, manifest=path)
+                play_timeline(bridge, [Beat("test", 10, 128, 128)], record=True, manifest=path)
             report = json.loads(path.read_text())
             self.assertFalse(report["complete"])
             self.assertIn("stalled recorder", report["error"])
