@@ -37,7 +37,12 @@ class CoreTests(unittest.TestCase):
 
     def test_mcp_discovery(self):
         r = handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
-        self.assertEqual(len(r["result"]["tools"]), 9)
+        names = {tool["name"] for tool in r["result"]["tools"]}
+        self.assertEqual(len(names), len(r["result"]["tools"]))
+        self.assertTrue({"inspect_game", "list_scenes", "list_actors", "load_scene",
+                         "spawn_actor", "direct_actor", "set_camera", "play_sequence",
+                         "capture_sequence", "inspect_engine_capabilities",
+                         "validate_cinematic_plan"} <= names)
 
 
 if __name__ == "__main__":
