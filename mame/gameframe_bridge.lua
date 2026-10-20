@@ -103,6 +103,10 @@ local function execute(action)
             emu.unpause()
         end
         return {step_requested = true, frame_advance_confirmed = false}
+    elseif action == "reset_step_tracking" then
+        -- Clears only the pending handshake; does not advance or resume MAME.
+        pending_step = nil
+        return {step_pending = false}
     elseif action == "snapshot" then
         manager.machine.video:snapshot()
         return {snapshot = "Saved to configured MAME snap directory"}
