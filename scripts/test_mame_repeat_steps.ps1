@@ -34,6 +34,9 @@ for n in range(1,6):
     print("  SCREEN COUNTERS:", r.before.get("screen_frames"), "->", r.after.get("screen_frames"),flush=True)
     print("  SINGLE STEP FLAG:",r.after.get("single_step_flag"),flush=True)
     good += int(r.confirmed)
+    if not r.confirmed:
+        print("STOPPING: Step did not complete; avoiding overlapping requests.",flush=True)
+        break
 print(f"REPEAT RESULT: {good}/5 observed single-screen-frame increments",flush=True)
 if good != 5:
     print("INCONCLUSIVE: Not every request advanced the screen counter. No deterministic replay claim.",flush=True)
