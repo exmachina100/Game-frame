@@ -61,3 +61,7 @@ See [development roadmap](docs/ROADMAP.md).
 
 ## IP / safety
 The demo uses procedurally created shapes only. Do not commit proprietary installed game files, ROMs or extracted commercial assets. Game integrations should operate against legitimate local installations with applicable permissions and licensing.
+
+## Experimental MAME control bridge
+
+The repository now includes a local Lua/Python bridge for a user-run MAME instance. It exposes status, pause, resume, screenshot and AVI recording commands, not per-character editing. See [MAME setup](docs/MAME.md). The implementation requires live compatibility testing with your installed MAME build; the Python request protocol has mocked tests but end-to-end integration is not yet confirmed.
