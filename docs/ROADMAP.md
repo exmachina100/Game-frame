@@ -46,7 +46,7 @@ GameFrame directs cinematic scenes through native game engines, using an engine-
 
 ## Engineering constraints
 - Frame-exact is a capability **per engine**, not a default product promise.
-- ioquake3 V1 local file bridge has been live verified; engine_cli still reports no adapter capabilities until implemented/verified there. V2 native render-camera bridge is experimental source code awaiting compilation and live verification.
+- ioquake3 V1 local file bridge has been live verified; engine_cli still reports no adapter capabilities until implemented/verified there. V2 native render-camera bridge has been compiled and visually verified by the user; frame-exact timing and readback remain unsupported.
 - No game executable, ROM or proprietary asset is bundled.
 - Cinematic plans should fail early when adapters lack requested operations.
 - Prefer thin engine adapters and reusable director/shot semantics over game-specific main UI.
