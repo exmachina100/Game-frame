@@ -41,14 +41,16 @@ def play_timeline(bridge: Any, beats: list[Beat], *,
                     "system": "pong", "frame_exact": False,
                     "record_requested": record, "beats": [], "complete": False}
     recording_started = False
+    cleanup_errors: list[str] = []
     try:
         bridge.request("pause")
         state = bridge.request("status")["info"]
         if state.get("system") != "pong":
             raise RuntimeError("Pong timeline must run against MAME pong")
         if record:
+            recording_started = True  # attempt cleanup even if start response is lost
             bridge.request("record_start")
-            recording_started = True
+            report["record_start_acknowledged"] = True
         for beat in beats:
             # Actions are applied while paused; then measured runtime begins.
             bridge.request("pause")
