@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import re
 from .ioquake3_v3_takes import Take,Pose,run_take
+from .ioquake3_capture_verify import snapshot_screenshot_dir, wait_for_capture, stage_verified_capture
 
 SAFE_NAME=re.compile(r"^[A-Za-z0-9_-]{1,48}$")
 
@@ -53,10 +54,19 @@ def load_production(path):
         raise ValueError("Shot names must be unique")
     return Production(raw["name"],tuple(result))
 
-def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=False,capture=False,clock=None,sleep=None):
+def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=False,capture=False,clock=None,sleep=None,
+                   screenshot_dir=None,output_dir=None,capture_timeout=3.0):
     if live and bridge is None: raise ValueError("Live mode requires bridge")
     if capture and (not live or not hasattr(bridge,"capture")):
         raise ValueError("Automated capture requires V4 patched bridge in live mode")
+    if (screenshot_dir is None)!=(output_dir is None):
+        raise ValueError("V5 verification needs both screenshot_dir and output_dir")
+    if screenshot_dir is not None and not capture:
+        raise ValueError("V5 verification requires capture enabled")
+    if screenshot_dir is not None and not Path(screenshot_dir).is_dir():
+        raise ValueError("Screenshot directory does not exist")
+    if screenshot_dir is not None and not 0<=capture_timeout<=30:
+        raise ValueError("Capture timeout outside 0-30 seconds")
     # Validate all movements before the first live command.
     for shot in production.shots:
         if not allow_translation and any(k.position!=shot.keyframes[0].position for k in shot.keyframes):
@@ -64,7 +74,8 @@ def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=
     manifests=[]
     status="completed"
     try:
-        for shot in production.shots:
+        for index,shot in enumerate(production.shots,1):
+            before=snapshot_screenshot_dir(screenshot_dir) if screenshot_dir is not None else None
             kw={"rate":rate,"live":live,"allow_translation":allow_translation,"reset_after":False}
             if clock is not None: kw["clock"]=clock
             if sleep is not None: kw["sleep"]=sleep
@@ -72,8 +83,15 @@ def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=
             entry={"name":shot.name,"camera":manifest,"captures":[]}
             if capture:
                 ack=bridge.capture(production.name+"_"+shot.name)
-                entry["captures"].append({"requested_name":production.name+"_"+shot.name,
-                    "queued":ack["queued"],"file_verified":False})
+                token=production.name+"_"+shot.name
+                capture_record={"requested_name":token,"queued":ack["queued"],"file_verified":False,
+                                "source_file":None,"output_file":None}
+                if screenshot_dir is not None and ack["queued"]:
+                    source=wait_for_capture(screenshot_dir,before,token,timeout=capture_timeout)
+                    if source is not None:
+                        target=stage_verified_capture(source,output_dir,index,shot.name)
+                        capture_record.update(file_verified=True,source_file=str(source),output_file=str(target))
+                entry["captures"].append(capture_record)
             manifests.append(entry)
     except BaseException:
         status="failed_or_interrupted"
@@ -82,6 +100,9 @@ def run_production(production,bridge=None,*,live=False,rate=8,allow_translation=
         if live and bridge is not None:
             try: bridge.reset()
             except Exception: pass
-    return {"schema":"gameframe.v4.production.v1","name":production.name,"status":status,
+    return {"schema":"gameframe.v5.production_manifest.v1" if screenshot_dir is not None else "gameframe.v4.production.v1","name":production.name,"status":status,
             "mode":"live" if live else "dry_run","shots":manifests,
-            "frame_accurate":False,"capture_files_verified":False}
+            "frame_accurate":False,
+            "capture_files_verified":bool(capture and screenshot_dir is not None and manifests and
+                                          all(e["captures"] and e["captures"][0]["file_verified"] for e in manifests)),
+            "output_dir":str(output_dir) if output_dir is not None else None}
