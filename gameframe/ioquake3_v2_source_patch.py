@@ -25,7 +25,7 @@ CLIENT_BRANCH=r'''
             && f>=20 && f<=130) {
             char command[300];
             snprintf(command, sizeof(command),
-              "set gf_cam_pose \"%.3f %.3f %.3f %.3f %.3f %.3f\"\\nset gf_cam_enabled 1\\nset cg_fov %.3f\\n",
+              "set gf_cam_pose \"%.3f %.3f %.3f %.3f %.3f %.3f\"\nset gf_cam_enabled 1\nset cg_fov %.3f\n",
               a,b,c,p,y,r,f);
             Cbuf_AddText(command);
             fprintf(fp, "QUEUED\n");
