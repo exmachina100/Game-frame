@@ -1,0 +1,78 @@
+{
+  "schema": "gameframe.cinematic.v1",
+  "title": "Alley surveillance — capability target, not executable yet",
+  "fps": 24,
+  "duration_frames": 480,
+  "commands": [
+    {
+      "frame": 0,
+      "operation": "load_scene",
+      "arguments": {
+        "name": "test_alley"
+      }
+    },
+    {
+      "frame": 0,
+      "operation": "spawn_actor",
+      "arguments": {
+        "name": "detective",
+        "position": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 0,
+      "operation": "set_camera",
+      "arguments": {
+        "position": [
+          0,
+          -4,
+          2
+        ],
+        "target": [
+          0,
+          0,
+          1.6
+        ]
+      }
+    },
+    {
+      "frame": 120,
+      "operation": "move_actor",
+      "arguments": {
+        "name": "detective",
+        "position": [
+          3,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "frame": 240,
+      "operation": "set_camera",
+      "arguments": {
+        "position": [
+          3,
+          -1,
+          1.7
+        ],
+        "target": [
+          3,
+          0,
+          1.6
+        ]
+      }
+    },
+    {
+      "frame": 360,
+      "operation": "capture_frame",
+      "arguments": {
+        "name": "reaction"
+      }
+    }
+  ]
+}
