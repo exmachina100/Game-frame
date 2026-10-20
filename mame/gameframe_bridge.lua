@@ -150,7 +150,7 @@ local function execute(action, request)
         if not field or type(field.set_value) ~= "function" then error("Pong paddle set_value unavailable") end
         field:set_value(value)
         return {paddle = paddle, requested_value = value, port = tag,
-                setter_called = true, readback = paddle_readback(paddle)}
+                setter_called = true, applied = true, readback = paddle_readback(paddle)}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
