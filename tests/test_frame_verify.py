@@ -18,6 +18,7 @@ class FrameVerifyTests(unittest.TestCase):
     def test_exact_increment(self):
         b = FakeBridge([
             {"paused": True, "screen_frames": {":screen": 65}},
+            {"paused": True, "screen_frames": {":screen": 65}},
             {"paused": True, "screen_frames": {":screen": 66}, "completed_frames": 20},
         ])
         result = verify_step(b, timeout=.1)
@@ -26,6 +27,7 @@ class FrameVerifyTests(unittest.TestCase):
 
     def test_multiple_frames_not_confirmed(self):
         b = FakeBridge([
+            {"paused": True, "screen_frames": {":screen": 65}},
             {"paused": True, "screen_frames": {":screen": 65}},
             {"paused": True, "screen_frames": {":screen": 67}},
         ])
