@@ -25,8 +25,8 @@ GameFrame directs cinematic scenes through native game engines, using an engine-
 - [ ] Identify valid executable and legal local engine/data installation
 - [x] Add manual Quake III native console camera-placement and capture smoke-test generators (not RPC)
 - [ ] Verify `setviewpos` and native screenshot/demo capture on the user's running engine
-- [x] Implement experimental source-patch local camera queue and Python controller (uncompiled)
-- [ ] Compile and live-verify patched ioquake3 on Windows with safe camera readback
+- [x] Implement experimental source-patch local camera queue and Python controller; user verified live commands
+- [x] Compile patched ioquake3 V1 on Windows and visually verify smooth timed yaw rotation (51 Python tests passed locally)\n- [x] Commit V2 render-only 6DOF pose patch, CLI, tests and isolated DLL launch instructions (uncompiled)\n- [ ] Compile and visually verify V2 render-only camera in game\n- [ ] Implement safe camera readback, scene/collision checks and request IDs
 - [ ] Build and verify game-side camera bridge and scene state inspection
 - [ ] Add stage/actor transform controls with documented limitations
 - [ ] Implement repeatable multi-shot timeline and native frame/video capture
@@ -46,7 +46,7 @@ GameFrame directs cinematic scenes through native game engines, using an engine-
 
 ## Engineering constraints
 - Frame-exact is a capability **per engine**, not a default product promise.
-- ioquake3 bridge is **not implemented**: engine_cli only diagnoses, it does not launch or control a game.
+- ioquake3 V1 local file bridge has been live verified; engine_cli still reports no adapter capabilities until implemented/verified there. V2 native render-camera bridge is experimental source code awaiting compilation and live verification.
 - No game executable, ROM or proprietary asset is bundled.
 - Cinematic plans should fail early when adapters lack requested operations.
 - Prefer thin engine adapters and reusable director/shot semantics over game-specific main UI.
