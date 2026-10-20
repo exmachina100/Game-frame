@@ -1,0 +1,28 @@
+{
+  "title": "Arena Arrival and Reveal",
+  "map": "q3dm1",
+  "duration": 16,
+  "beats": [
+    {
+      "start": 0,
+      "end": 5,
+      "intent": "establishing",
+      "subject": "environment",
+      "action": "Reveal central arena architecture"
+    },
+    {
+      "start": 5,
+      "end": 11,
+      "intent": "follow",
+      "subject": "hero",
+      "action": "Hero enters arena through east doorway"
+    },
+    {
+      "start": 11,
+      "end": 16,
+      "intent": "reaction",
+      "subject": "hero",
+      "action": "Hero pauses and looks toward central statue"
+    }
+  ]
+}
