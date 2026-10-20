@@ -51,7 +51,7 @@ With the game running a `devmap` session, type in Quake III console:
 /exec gameframe_take_03.cfg
 ```
 
-Each command **manually** sets an example position and yaw. These positions are placeholders and may be inside level geometry; collision and camera clearance are not yet validated. Look for a change in viewpoint and tell us if the game reports `Unknown command 'setviewpos'`, `Cheats are not enabled`, or another message.
+The **--where coordinates must come from your current map**. The numbers in this example were observed in one previous local /where response; confirm them again before using them. All three takes keep the same known player position and change yaw only. This avoids teleporting to arbitrary world coordinates, but does not verify camera clearance or gameplay behavior. Look for a change in viewpoint and tell us if the game reports `Unknown command 'setviewpos'`, `Cheats are not enabled`, or another message.
 
 The original `docs/examples/alley_scene.json` contains actor and camera actions **not** supported by this console pilot. Don't use it for the cfg exporter.
 
@@ -64,3 +64,7 @@ The original `docs/examples/alley_scene.json` contains actor and camera actions 
 5. Then add actor staging and scene direction.
 
 No bridge command or true free-camera functionality is claimed until tested.
+
+
+## Safety update
+Do not run the old take files generated at coordinates (0, 0, 128), (128, 0, 128), and (128, 128, 128). Those positions were not map-validated and visibly produced an invalid view. The exporter now refuses `--write` unless `--where X Y Z` is provided. Recreate the files using the current map position first.
