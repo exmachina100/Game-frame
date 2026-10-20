@@ -35,11 +35,21 @@ def run_until_frames(bridge, target_frames: int, *, timeout: float = 8.0,
     if start.get("step_pending"):
         bridge.request("reset_step_tracking")
     latest = start
+    status_timeouts = 0
     bridge.request("resume")
     try:
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            latest = bridge.request("status")["info"]
+            try:
+                latest = bridge.request("status")["info"]
+                status_timeouts = 0
+            except TimeoutError:
+                # A single stalled read is not evidence the run has stopped.
+                # Only retry read-only status; never duplicate control actions.
+                status_timeouts += 1
+                if status_timeouts >= 3:
+                    raise
+                continue
             current = _frames(latest)
             deltas = {key: current[key] - value for key, value in base.items()
                       if key in current and isinstance(current[key], (float, int))}
