@@ -36,6 +36,31 @@ class MameBridgeTests(unittest.TestCase):
             self.assertEqual(response["info"]["paused"], True)
             self.assertEqual(list(directory.glob("request_*.json")), [])
 
+
+    def test_partial_response_is_retried(self):
+        with TemporaryDirectory() as temp:
+            directory = Path(temp)
+            bridge = MameBridge(directory, timeout=2)
+            def fake_mame():
+                deadline = monotonic() + 1.5
+                while monotonic() < deadline:
+                    requests = list(directory.glob("request_*.json"))
+                    if requests:
+                        payload = json.loads(requests[0].read_text())
+                        response = directory / f"response_{payload['id']}.json"
+                        response.write_text("")
+                        sleep(0.08)
+                        response.write_text(json.dumps({"id": payload["id"], "ok": True, "info": {"paused": True}}))
+                        return
+                    sleep(.01)
+                raise AssertionError("No request observed")
+            t = Thread(target=fake_mame)
+            t.start()
+            try:
+                self.assertTrue(bridge.request("status")["info"]["paused"])
+            finally:
+                t.join()
+
     def test_timeout(self):
         with TemporaryDirectory() as temp:
             with self.assertRaises(TimeoutError):
