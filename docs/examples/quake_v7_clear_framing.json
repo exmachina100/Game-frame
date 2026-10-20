@@ -1,0 +1,87 @@
+{
+  "name": "arena_clear_framing",
+  "shots": [
+    {
+      "name": "arena_establish_315",
+      "keyframes": [
+        {
+          "time": 0,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 315,
+          "roll": 0,
+          "fov": 85
+        },
+        {
+          "time": 2,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 305,
+          "roll": 0,
+          "fov": 80
+        },
+        {
+          "time": 4,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 315,
+          "roll": 0,
+          "fov": 85
+        }
+      ]
+    },
+    {
+      "name": "architecture_pan_270_330",
+      "keyframes": [
+        {
+          "time": 0,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 270,
+          "roll": 0,
+          "fov": 85
+        },
+        {
+          "time": 3,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 300,
+          "roll": 0,
+          "fov": 85
+        },
+        {
+          "time": 6,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 330,
+          "roll": 0,
+          "fov": 85
+        }
+      ]
+    }
+  ]
+}
