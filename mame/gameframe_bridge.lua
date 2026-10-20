@@ -90,6 +90,31 @@ local function respond(id, ok, info, err)
     assert(moved, "Cannot publish MAME response: " .. tostring(why))
 end
 
+local function paddle_readback(paddle)
+    local tag = paddle == 0 and ":PADDLE0" or ":PADDLE1"
+    local name = paddle == 0 and "Paddle" or "Paddle 2"
+    local port = manager.machine.ioport.ports[tag]
+    if not port then error("Pong paddle port missing: " .. tag) end
+    local field = port.fields[name]
+    if not field then error("Pong paddle field missing: " .. name) end
+    local result = {paddle = paddle, port = tag, field = name}
+    local tests = {
+        {"field_value", function() return field.value end},
+        {"port_read", function() return port:read() end},
+        {"field_live", function() return field.live end},
+        {"field_settings", function() return field.user_settings end}
+    }
+    for _, item in ipairs(tests) do
+        local ok, value = pcall(item[2])
+        if ok and (type(value) == "number" or type(value) == "boolean" or type(value) == "string") then
+            result[item[1]] = value
+        else
+            result[item[1] .. "_available"] = false
+        end
+    end
+    return result
+end
+
 local function execute(action, request)
     if action == "status" then
         local frames, frame_error = frame_counter()
@@ -110,6 +135,8 @@ local function execute(action, request)
                 step_pending = pending_step ~= nil}
     elseif action == "input_capabilities" then
         return {ports = input_capabilities()}
+    elseif action == "read_paddles" then
+        return {paddles = {paddle_readback(0), paddle_readback(1)}}
     elseif action == "set_paddle" then
         local paddle = request.paddle
         local value = request.value
@@ -122,7 +149,8 @@ local function execute(action, request)
         local field = port.fields[target]
         if not field or type(field.set_value) ~= "function" then error("Pong paddle set_value unavailable") end
         field:set_value(value)
-        return {paddle = paddle, requested_value = value, port = tag, applied = true}
+        return {paddle = paddle, requested_value = value, port = tag,
+                setter_called = true, readback = paddle_readback(paddle)}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
