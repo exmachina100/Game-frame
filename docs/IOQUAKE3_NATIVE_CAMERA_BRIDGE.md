@@ -27,7 +27,16 @@ python -m gameframe.ioquake3_source_patch "D:\AI\Game Frame\ioq3-gameframe-sourc
 python -m unittest discover -s tests -v
 ```
 
-To build the patched client on Windows, follow the upstream ioquake3 build instructions for your selected Visual Studio/CMake/MSYS2 toolchain and produce a **new executable in a separate build directory**. We have not verified a particular toolchain or compilation of the source patch. Do **not** overwrite `D:\AI\Game Frame\ioquake3\ioquake3.x86_64.exe` until the new build works independently.
+To build the patched client on Windows, install Visual Studio 2022 Community with C++ desktop tools and CMake. Upstream documents the following commands:
+
+```powershell
+cd "D:\\AI\\Game Frame\\ioq3-gameframe-source"
+cmake -S . -B build-gameframe -G "Visual Studio 17 2022"
+cmake --build build-gameframe --config Release
+Get-ChildItem ".\\build-gameframe" -Recurse -Filter "ioquake3*.exe" | Select-Object FullName
+```
+
+The built executable may need renderer libraries and other runtime files from the same build directory. Run it from its compiled output tree, keeping your original game binary intact. The GameFrame source patch has NOT yet been compiled or locally tested. Do **not** overwrite `D:\AI\Game Frame\ioquake3\ioquake3.x86_64.exe` until the new build works independently.
 
 ## First smoke test (only after successful custom compilation)
 
