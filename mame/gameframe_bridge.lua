@@ -7,6 +7,30 @@ local json = require("json")
 local lfs = require("lfs")
 local processed = {}
 
+local function frame_counter()
+    local frames = {}
+    for tag, screen in pairs(manager.machine.screens) do
+        frames[tostring(tag)] = screen.frame_number
+    end
+    return frames
+end
+
+local function input_catalog()
+    local ports = {}
+    local count = 0
+    for tag, port in pairs(manager.machine.ioport.ports) do
+        local fields = {}
+        for name, field in pairs(port.fields) do
+            fields[#fields + 1] = {name = tostring(name), player = field.player,
+                mask = field.mask, analog = field.minvalue ~= nil}
+        end
+        ports[#ports + 1] = {tag = tostring(tag), fields = fields}
+        count = count + 1
+        if count >= 64 then break end
+    end
+    return ports
+end
+
 local function respond(id, ok, info, err)
     local response = {id = id, ok = ok}
     if ok then response.info = info else response.error = tostring(err or "Unknown error") end
@@ -20,7 +44,10 @@ local function execute(action)
         return {system = manager.machine.system.name,
                 paused = manager.machine.paused,
                 recording = manager.machine.video.is_recording,
-                single_step_available = type(manager.ui.single_step) == "boolean"}
+                single_step_available = type(manager.ui.single_step) == "boolean",
+                screen_frames = frame_counter()}
+    elseif action == "list_inputs" then
+        return {ports = input_catalog()}
     elseif action == "pause" then
         emu.pause()
         return {paused = true}
