@@ -15,6 +15,7 @@ try {
   $arguments="pong -autoboot_script `"$lua`" -autoboot_delay 1 -window -verbose"
   $proc=Start-Process -FilePath $MameExe -ArgumentList $arguments -WorkingDirectory (Split-Path $MameExe) -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
   $recordFlag=if ($Record) { "1" } else { "0" }
+  $shotPath=if ([string]::IsNullOrWhiteSpace($ShotPlan)) { "-" } else { (Resolve-Path $ShotPlan).Path }
   @'
 import sys,time,json
 from pathlib import Path
@@ -31,7 +32,7 @@ while time.monotonic()<deadline:
         time.sleep(.25)
 else:
     raise RuntimeError("MAME startup timeout")
-beats=load_shot_plan(sys.argv[5]) if sys.argv[5] else DEMO_BEATS
+beats=load_shot_plan(sys.argv[5]) if sys.argv[5] != "-" else DEMO_BEATS
 result=play_timeline(bridge,beats,record=(sys.argv[4]=="1"),manifest=Path(sys.argv[3]))
 for beat in result["beats"]:
     print("BEAT:",beat["label"],"TARGET:",beat["frames"],"ACTUAL:",beat["actual_frames"],flush=True)
@@ -39,7 +40,7 @@ print("COMPLETE:",result["complete"],"FRAME_EXACT:",result["frame_exact"],flush=
 print("MANIFEST:",sys.argv[3],flush=True)
 if sys.argv[4]=="1":
     print("MAME AVI recording was requested; check its configured video output directory",flush=True)
-'@ | python - $dir $TimeoutSeconds $manifest $recordFlag $ShotPlan
+'@ | python - $dir $TimeoutSeconds $manifest $recordFlag $shotPath
   $code=$LASTEXITCODE
   if ($code -ne 0) {
     Write-Host "Manifest: $manifest" -ForegroundColor Yellow
