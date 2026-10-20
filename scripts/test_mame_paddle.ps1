@@ -27,11 +27,13 @@ while time.monotonic()<deadline:
         time.sleep(.2)
 else:
     raise RuntimeError("MAME did not start")
+print("INITIAL READBACK:",b.request("read_paddles")["info"],flush=True)
 for paddle,value in [(0,32),(1,224),(0,224),(1,32),(0,128),(1,128)]:
     result=b.request("set_paddle",paddle=paddle,value=value)
     print("PADDLE:",result["info"],flush=True)
     run=run_until_frames(b,10,timeout=8)
     print("  FRAMES:",run.deltas,"PAUSED:",run.paused,flush=True)
+    print("  LIVE READBACK:",b.request("read_paddles")["info"],flush=True)
 print("COMMANDS ACCEPTED: inspect MAME window for actual paddle movement",flush=True)
 '@ | python - $dir $TimeoutSeconds
   $code=$LASTEXITCODE
