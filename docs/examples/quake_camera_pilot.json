@@ -1,0 +1,44 @@
+{
+  "schema": "gameframe.cinematic.v1",
+  "title": "ioquake3 camera placement feasibility (manual takes)",
+  "fps": 24,
+  "duration_frames": 240,
+  "commands": [
+    {
+      "frame": 0,
+      "operation": "set_camera",
+      "arguments": {
+        "position": [
+          0,
+          0,
+          128
+        ],
+        "yaw": 0
+      }
+    },
+    {
+      "frame": 72,
+      "operation": "set_camera",
+      "arguments": {
+        "position": [
+          128,
+          0,
+          128
+        ],
+        "yaw": 90
+      }
+    },
+    {
+      "frame": 144,
+      "operation": "set_camera",
+      "arguments": {
+        "position": [
+          128,
+          128,
+          128
+        ],
+        "yaw": 180
+      }
+    }
+  ]
+}
