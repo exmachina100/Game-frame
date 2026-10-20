@@ -15,7 +15,7 @@ import re
 import time
 import uuid
 
-_ALLOWED = {"status", "pause", "resume", "step_once", "reset_step_tracking", "list_inputs", "input_capabilities", "set_paddle", "snapshot", "record_start", "record_stop"}
+_ALLOWED = {"status", "pause", "resume", "step_once", "reset_step_tracking", "list_inputs", "input_capabilities", "set_paddle", "read_paddles", "snapshot", "record_start", "record_stop"}
 _SAFE_ID = re.compile(r"^[a-f0-9]{32}$")
 
 
