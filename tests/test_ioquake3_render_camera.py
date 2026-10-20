@@ -36,7 +36,7 @@ class RenderCameraTests(unittest.TestCase):
             updated=path.read_text()
             self.assertIn("#ifndef Q3_VM",updated)
             self.assertIn("#endif /* !Q3_VM */",updated)
-            self.assertIn("GF_CinematicView();\\n#endif",updated)
+            self.assertIn("GF_CinematicView();\n#endif",updated)
             self.assertEqual(repair_checkout(Path(folder)),path)
 
     def test_transport_roundtrip(self):
