@@ -69,3 +69,33 @@ This generates `01_origin.jpg`, `02_left.jpg`, `03_right.jpg`, `04_back.jpg`, `0
 - Camera raycasts and geometry-aware avoidance, with chosen subject visibility checked.
 - Resolution independent from window size, scene actor choreography, synchronization and codec selection.
 - Per-frame timing diagnostics and movie cadence analysis.
+
+
+## Phase 1c: 360-degree yaw scout from a stationary camera
+
+The previous six-view XYZ offset scout stayed wall-obstructed. Before moving
+the camera again, use the new directional sweep, capturing eight yaw positions
+at fixed XYZ, pitch zero, roll zero and FOV 85. This avoids any camera
+translation during the test.
+
+Run with console CLOSED; the native screenshot command otherwise records
+the drop-down developer console and hides much of the image.
+
+```powershell
+cd "D:\AI\Game Frame\Game-frame"
+git pull origin main
+python -m unittest discover -s tests -v
+python -m gameframe.ioquake3_v7_directional_scout `
+  --dir "D:\AI\Game Frame\ioq3-camera-bridge" `
+  --screenshot-dir "D:\AI\Game Frame\ioq3-v2-home\baseq3\screenshots" `
+  --output-dir "output\v7_directional_01" `
+  --origin 212 2360 56 `
+  --pitch 0 `
+  --step 45
+explorer "D:\AI\Game Frame\Game-frame\output\v7_directional_01"
+```
+
+Expected: numbered `01_yaw_000.jpg` to `08_yaw_315.jpg` plus
+`directions.json`. Select the clearest view toward the open arena, then
+revisit camera placement. A directional scout does NOT raycast map geometry
+or prove unobstructed camera travel.
