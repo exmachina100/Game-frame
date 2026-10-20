@@ -27,10 +27,13 @@ class FilmTests(unittest.TestCase):
     def test_valid_preflight_passes_two_shots_to_v6(self):
         with tempfile.TemporaryDirectory() as folder:
             dest=Path(folder)/"take"
-            dest.mkdir()
+            def mock_record_film(*args, **kwargs):
+                # The real V6 recorder creates its own fresh output directory.
+                Path(kwargs["output_dir"]).mkdir()
+                return {"status":"completed","frames":[],"shots":[],
+                        "video":{"verified":True}}
             with patch("gameframe.ioquake3_v7_film.record_film",
-                       return_value={"status":"completed","frames":[],"shots":[],
-                           "video":{"verified":True}}) as recorder:
+                       side_effect=mock_record_film) as recorder:
                 result=produce_checked_film(Trace(),object(),screenshots=folder,
                     output_dir=dest,encode=False)
                 production=recorder.call_args.args[0]
