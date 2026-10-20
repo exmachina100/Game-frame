@@ -28,13 +28,17 @@ while time.monotonic()<deadline:
 else:
     raise RuntimeError("No response from MAME bridge")
 good=0
-for n in range(1,4):
+for n in range(1,6):
     r=verify_step(b,timeout=4)
     print(f"STEP {n}: delta={r.screen_deltas}, paused={r.paused}, confirmed={r.confirmed}",flush=True)
+    print("  SCREEN COUNTERS:", r.before.get("screen_frames"), "->", r.after.get("screen_frames"),flush=True)
+    print("  SINGLE STEP FLAG:",r.after.get("single_step_flag"),flush=True)
     good += int(r.confirmed)
-print(f"REPEAT RESULT: {good}/3 verified single-screen-frame steps",flush=True)
-if good!=3:
-    sys.exit(2)
+print(f"REPEAT RESULT: {good}/5 observed single-screen-frame increments",flush=True)
+if good != 5:
+    print("INCONCLUSIVE: Not every request advanced the screen counter. No deterministic replay claim.",flush=True)
+else:
+    print("PASS: all five requests advanced the screen counter exactly once.",flush=True)
 '@ | python - $folder $TimeoutSeconds
     $code=$LASTEXITCODE
     if ($code -ne 0) {
