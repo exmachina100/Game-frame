@@ -6,6 +6,7 @@ if root:sub(-1) ~= sep then root = root .. sep end
 local json = require("json")
 local lfs = require("lfs")
 local processed = {}
+local pending_step = nil
 local completed_frames = 0
 emu.register_frame_done(function() completed_frames = completed_frames + 1 end, "frame")
 
@@ -63,13 +64,21 @@ end
 local function execute(action)
     if action == "status" then
         local frames, frame_error = frame_counter()
+        if pending_step and manager.machine.paused then
+            local moved = false
+            for tag, previous in pairs(pending_step.before) do
+                if type(frames[tag]) == "number" and frames[tag] > previous then moved = true end
+            end
+            if moved then pending_step = nil end
+        end
         return {system = manager.machine.system.name,
                 paused = manager.machine.paused,
                 recording = manager.machine.video.is_recording,
                 single_step_available = type(manager.ui.single_step) == "boolean",
                 screen_frames = frames, screen_frame_error = frame_error,
                 completed_frames = completed_frames,
-                single_step_flag = manager.ui.single_step}
+                single_step_flag = manager.ui.single_step,
+                step_pending = pending_step ~= nil}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
@@ -84,6 +93,9 @@ local function execute(action)
         if type(manager.ui.single_step) ~= "boolean" then
             error("UI single_step is not available in this MAME build")
         end
+        if pending_step ~= nil then error("Previous step not yet observed; do not overlap step commands") end
+        local baseline = frame_counter()
+        pending_step = {before = baseline}
         if type(emu.step) == "function" then
             emu.step()
         else
