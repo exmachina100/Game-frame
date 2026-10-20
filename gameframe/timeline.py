@@ -72,18 +72,23 @@ def play_timeline(bridge: Any, beats: list[Beat], *,
         report["error"] = str(exc)
         raise
     finally:
+        cleanup_errors = []
         try:
             bridge.request("pause")
-        finally:
-            if recording_started:
-                try:
-                    bridge.request("record_stop")
-                except Exception as exc:
-                    report["record_stop_error"] = str(exc)
-            if manifest is not None:
-                destination = Path(manifest)
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        except Exception as exc:
+            cleanup_errors.append("pause: " + str(exc))
+        if recording_started:
+            try:
+                bridge.request("record_stop")
+                report["record_stop_acknowledged"] = True
+            except Exception as exc:
+                cleanup_errors.append("record_stop: " + str(exc))
+        if cleanup_errors:
+            report["cleanup_errors"] = cleanup_errors
+        if manifest is not None:
+            destination = Path(manifest)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     return report
 
 
