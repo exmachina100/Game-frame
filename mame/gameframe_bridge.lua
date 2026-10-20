@@ -9,15 +9,20 @@ local processed = {}
 
 local function frame_counter()
     local frames = {}
-    local ok, screens = pcall(function() return manager.machine.screens end)
-    if not ok or not screens then return frames end
-    pcall(function()
-        for tag, screen in pairs(screens) do
-            local good, count = pcall(function() return screen.frame_number end)
-            if good and type(count) == "number" then frames[tostring(tag)] = count end
+    local ok, err = pcall(function()
+        for tag, screen in pairs(manager.machine.screens) do
+            -- MAME versions may expose frame_number as a property or method.
+            local success, n = pcall(function()
+                local value = screen.frame_number
+                if type(value) == "function" then return screen:frame_number() end
+                return value
+            end)
+            if success and type(n) == "number" then
+                frames[tostring(tag)] = n
+            end
         end
     end)
-    return frames
+    return frames, ok and nil or tostring(err)
 end
 
 local function input_catalog()
@@ -55,11 +60,12 @@ end
 
 local function execute(action)
     if action == "status" then
+        local frames, frame_error = frame_counter()
         return {system = manager.machine.system.name,
                 paused = manager.machine.paused,
                 recording = manager.machine.video.is_recording,
                 single_step_available = type(manager.ui.single_step) == "boolean",
-                screen_frames = frame_counter()}
+                screen_frames = frames, screen_frame_error = frame_error}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
