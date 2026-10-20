@@ -42,9 +42,14 @@ try:
     time.sleep(.35)
     after=b.request("status")["info"]
     print("AFTER:",after,flush=True)
-    initial=before.get("screen_frames",{})
-    final=after.get("screen_frames",{})
+    initial=before.get("screen_frames") or {}
+    final=after.get("screen_frames") or {}
+    if not isinstance(initial,dict) or not isinstance(final,dict):
+        print("COUNTER FORMAT UNAVAILABLE:",type(initial).__name__,type(final).__name__,flush=True)
+        initial,final={},{}
     delta={key: final[key]-value for key,value in initial.items() if key in final}
+    if not delta:
+        print("COUNTER DIAGNOSTIC:",before.get("screen_frame_error"),after.get("screen_frame_error"),flush=True)
     print("FRAME DELTA:",delta,flush=True)
     print("PAUSED AFTER:",after.get("paused"),flush=True)
     print("RESULT:", "CONFIRMED" if delta and all(x==1 for x in delta.values()) and after.get("paused") else "INCONCLUSIVE",flush=True)
