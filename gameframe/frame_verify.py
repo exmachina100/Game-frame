@@ -40,7 +40,7 @@ def verify_step(bridge, timeout: float = 3.0, poll_seconds: float = 0.02) -> Ste
         last = bridge.request("status")["info"]
         current = _screens(last)
         deltas = {k: current[k] - v for k, v in start.items() if k in current}
-        if last.get("paused") and (not start or any(d != 0 for d in deltas.values())):
+        if last.get("paused") and start and any(d != 0 for d in deltas.values()) and not last.get("step_pending", False):
             return StepResult(before, last, deltas, True)
         time.sleep(poll_seconds)
     current = _screens(last)
