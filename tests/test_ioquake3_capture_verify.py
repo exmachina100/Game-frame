@@ -1,4 +1,6 @@
 import tempfile
+import contextlib
+import io
 import unittest
 from pathlib import Path
 from gameframe.ioquake3_capture_verify import (
@@ -28,6 +30,14 @@ def film():
     return Production("capture_test",(Take("shot_a",keys),Take("shot_b",keys)))
 
 class CaptureVerificationTests(unittest.TestCase):
+    def test_cli_import_and_dry_run(self):
+        from gameframe.ioquake3_v4_production_cli import main
+        with tempfile.TemporaryDirectory() as directory:
+            example=Path(__file__).resolve().parents[1]/"docs/examples/quake_v4_film.json"
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                main([str(example),"--manifest",str(Path(directory)/"manifest.json")])
+            self.assertIn('"mode": "dry_run"',output.getvalue())
+
     def test_new_file_detection_and_no_unrelated_fallback(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder=Path(tmp)
