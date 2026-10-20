@@ -1,5 +1,5 @@
 # Produce a measured native-MAME Pong directing test and manifest.
-param([string]$MameExe="C:\MAME\mame.exe",[int]$TimeoutSeconds=35,[switch]$Record)
+param([string]$MameExe="C:\MAME\mame.exe",[int]$TimeoutSeconds=35,[switch]$Record,[string]$ShotPlan="")
 $ErrorActionPreference="Stop"
 $root=(Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $lua=Join-Path $root "mame\gameframe_bridge.lua"
@@ -20,6 +20,7 @@ import sys,time,json
 from pathlib import Path
 from gameframe.mame_bridge import MameBridge
 from gameframe.timeline import play_timeline,DEMO_BEATS
+from gameframe.shot_plan import load_shot_plan
 bridge=MameBridge(Path(sys.argv[1]),timeout=2.5)
 deadline=time.monotonic()+int(sys.argv[2])
 while time.monotonic()<deadline:
@@ -30,14 +31,15 @@ while time.monotonic()<deadline:
         time.sleep(.25)
 else:
     raise RuntimeError("MAME startup timeout")
-result=play_timeline(bridge,DEMO_BEATS,record=(sys.argv[4]=="1"),manifest=Path(sys.argv[3]))
+beats=load_shot_plan(sys.argv[5]) if sys.argv[5] else DEMO_BEATS
+result=play_timeline(bridge,beats,record=(sys.argv[4]=="1"),manifest=Path(sys.argv[3]))
 for beat in result["beats"]:
     print("BEAT:",beat["label"],"TARGET:",beat["frames"],"ACTUAL:",beat["actual_frames"],flush=True)
 print("COMPLETE:",result["complete"],"FRAME_EXACT:",result["frame_exact"],flush=True)
 print("MANIFEST:",sys.argv[3],flush=True)
 if sys.argv[4]=="1":
     print("MAME AVI recording was requested; check its configured video output directory",flush=True)
-'@ | python - $dir $TimeoutSeconds $manifest $recordFlag
+'@ | python - $dir $TimeoutSeconds $manifest $recordFlag $ShotPlan
   $code=$LASTEXITCODE
   if ($code -ne 0) {
     Write-Host "Manifest: $manifest" -ForegroundColor Yellow
