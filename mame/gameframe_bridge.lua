@@ -34,9 +34,13 @@ end
 local function respond(id, ok, info, err)
     local response = {id = id, ok = ok}
     if ok then response.info = info else response.error = tostring(err or "Unknown error") end
-    local file = assert(io.open(root .. "response_" .. id .. ".json", "w"))
+    local temporary = root .. "response_" .. id .. ".tmp"
+    local final = root .. "response_" .. id .. ".json"
+    local file = assert(io.open(temporary, "w"))
     file:write(json.stringify(response))
     file:close()
+    local moved, why = os.rename(temporary, final)
+    assert(moved, "Cannot publish MAME response: " .. tostring(why))
 end
 
 local function execute(action)
