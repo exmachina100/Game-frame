@@ -85,9 +85,36 @@ def patch_cgame(source: str) -> str:
     if source.count(anchor)!=1 or source.count(target)!=1:
         raise ValueError("Unsupported cg_view.c anchors")
     # cg_local.h includes math library through Q_shared headers; add standard headers explicitly.
-    prefix='#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n'
-    source=source.replace(anchor,prefix+CGAME_HOOK+"\n"+anchor,1)
-    return source.replace(target,target+"\n\tGF_CinematicView();",1)
+    prefix='#ifndef Q3_VM\n#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n'
+    source=source.replace(anchor,prefix+CGAME_HOOK.replace("*/\\n/*", "*/\n/*")+"\n#endif /* !Q3_VM */\n"+anchor,1)
+    return source.replace(target,target+"\n#ifndef Q3_VM\n\tGF_CinematicView();\n#endif",1)
+
+def repair_checkout(root: Path) -> Path:
+    """Guard existing V2 native-only camera override from the QVM compiler."""
+    file = root / "code/cgame/cg_view.c"
+    source = file.read_text(encoding="utf-8")
+    if "GF_CinematicView" not in source:
+        raise ValueError("V2 cgame override is not installed")
+    if "#ifndef Q3_VM\n#include <stdio.h>" in source:
+        print("V2 cgame QVM guard already installed")
+        return file
+    needle = "#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n"
+    if source.count(needle) != 1:
+        raise ValueError("Expected exactly one V2 standard-header block")
+    source = source.replace(needle, "#ifndef Q3_VM\n"+needle,1)
+    # V2 previously inserted a literal backslash-n between marker comments.
+    source = source.replace("/* GAMEFRAME_V2_CGAME */\\n/*", "/* GAMEFRAME_V2_CGAME */\n/*",1)
+    anchor = "\nstatic int CG_CalcViewValues( void ) {"
+    if source.count(anchor) != 1:
+        raise ValueError("Unsupported cgame view anchor")
+    source=source.replace(anchor,"\n#endif /* !Q3_VM */"+anchor,1)
+    call="\n\tGF_CinematicView();"
+    if source.count(call) != 1:
+        raise ValueError("V2 camera call not found exactly once")
+    source=source.replace(call,"\n#ifndef Q3_VM"+call+"\n#endif",1)
+    file.write_text(source,encoding="utf-8")
+    return file
+
 
 def patch_checkout(root: Path) -> tuple[Path,Path]:
     client=root/"code/client/cl_main.c"
@@ -107,8 +134,11 @@ def main(argv=None):
     p=argparse.ArgumentParser(description="Apply experimental V2 render-camera patch")
     p.add_argument("checkout",type=Path)
     p.add_argument("--apply",action="store_true")
+    p.add_argument("--repair-qvm",action="store_true",help="Repair already-patched V2 cgame for QVM builds")
     args=p.parse_args(argv)
-    if args.apply:
+    if args.repair_qvm:
+        print("Repaired:",repair_checkout(args.checkout))
+    elif args.apply:
         print("Patched:",*[str(p) for p in patch_checkout(args.checkout)],sep="\n")
     else:
         root=args.checkout
