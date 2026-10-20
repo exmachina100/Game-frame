@@ -31,7 +31,19 @@ def verify_step(bridge, timeout: float = 3.0, poll_seconds: float = 0.02) -> Ste
     if timeout <= 0 or poll_seconds <= 0:
         raise ValueError("timeout and poll_seconds must be positive")
     bridge.request("pause")
+    # Let the paused machine settle before sampling baseline. Screen counters
+    # and asynchronous Lua/host commands do not necessarily update together.
     before = bridge.request("status")["info"]
+    settle_until = time.monotonic() + min(0.4, timeout / 3)
+    while time.monotonic() < settle_until:
+        time.sleep(poll_seconds)
+        sample = bridge.request("status")["info"]
+        if sample.get("paused") and _screens(sample) == _screens(before):
+            before = sample
+            break
+        before = sample
+    if before.get("step_pending"):
+        raise RuntimeError("Previous MAME step is pending; refusing to issue another")
     start = _screens(before)
     bridge.request("step_once")
     deadline = time.monotonic() + timeout
