@@ -1,0 +1,128 @@
+{
+  "name": "arena_film_24s",
+  "shots": [
+    {
+      "name": "establishing_pan",
+      "keyframes": [
+        {
+          "time": 0,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0,
+          "fov": 85
+        },
+        {
+          "time": 4,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 65,
+          "roll": 0,
+          "fov": 75
+        },
+        {
+          "time": 8,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": -5,
+          "yaw": 100,
+          "roll": 0,
+          "fov": 70
+        }
+      ]
+    },
+    {
+      "name": "compression_telephoto",
+      "keyframes": [
+        {
+          "time": 0,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": -5,
+          "yaw": 110,
+          "roll": 0,
+          "fov": 55
+        },
+        {
+          "time": 4,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 8,
+          "yaw": 145,
+          "roll": 12,
+          "fov": 50
+        },
+        {
+          "time": 8,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 3,
+          "yaw": 180,
+          "roll": 0,
+          "fov": 65
+        }
+      ]
+    },
+    {
+      "name": "return_wide",
+      "keyframes": [
+        {
+          "time": 0,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 5,
+          "yaw": 200,
+          "roll": -10,
+          "fov": 70
+        },
+        {
+          "time": 4,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 255,
+          "roll": 0,
+          "fov": 95
+        },
+        {
+          "time": 8,
+          "position": [
+            212,
+            2360,
+            56
+          ],
+          "pitch": 0,
+          "yaw": 310,
+          "roll": 0,
+          "fov": 85
+        }
+      ]
+    }
+  ]
+}
