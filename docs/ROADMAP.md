@@ -25,6 +25,8 @@ GameFrame directs cinematic scenes through native game engines, using an engine-
 - [ ] Identify valid executable and legal local engine/data installation
 - [x] Add manual Quake III native console camera-placement and capture smoke-test generators (not RPC)
 - [ ] Verify `setviewpos` and native screenshot/demo capture on the user's running engine
+- [x] Implement experimental source-patch local camera queue and Python controller (uncompiled)
+- [ ] Compile and live-verify patched ioquake3 on Windows with safe camera readback
 - [ ] Build and verify game-side camera bridge and scene state inspection
 - [ ] Add stage/actor transform controls with documented limitations
 - [ ] Implement repeatable multi-shot timeline and native frame/video capture
