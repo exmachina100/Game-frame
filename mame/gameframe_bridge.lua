@@ -6,6 +6,8 @@ if root:sub(-1) ~= sep then root = root .. sep end
 local json = require("json")
 local lfs = require("lfs")
 local processed = {}
+local completed_frames = 0
+emu.register_frame_done(function() completed_frames = completed_frames + 1 end, "frame")
 
 local function frame_counter()
     local frames = {}
@@ -65,7 +67,9 @@ local function execute(action)
                 paused = manager.machine.paused,
                 recording = manager.machine.video.is_recording,
                 single_step_available = type(manager.ui.single_step) == "boolean",
-                screen_frames = frames, screen_frame_error = frame_error}
+                screen_frames = frames, screen_frame_error = frame_error,
+                completed_frames = completed_frames,
+                single_step_flag = manager.ui.single_step}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
@@ -80,8 +84,12 @@ local function execute(action)
         if type(manager.ui.single_step) ~= "boolean" then
             error("UI single_step is not available in this MAME build")
         end
-        manager.ui.single_step = true
-        emu.unpause()
+        if type(emu.step) == "function" then
+            emu.step()
+        else
+            manager.ui.single_step = true
+            emu.unpause()
+        end
         return {step_requested = true, frame_advance_confirmed = false}
     elseif action == "snapshot" then
         manager.machine.video:snapshot()
