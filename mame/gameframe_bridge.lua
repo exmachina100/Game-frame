@@ -49,6 +49,35 @@ local function input_catalog()
     return ports
 end
 
+local function input_capabilities()
+    local result = {}
+    local ok, ports = pcall(function() return manager.machine.ioport.ports end)
+    if not ok or not ports then return result end
+    pcall(function()
+        for tag, port in pairs(ports) do
+            local fields = {}
+            pcall(function()
+                for name, field in pairs(port.fields) do
+                    local entry = {name = tostring(name)}
+                    for _, property in ipairs({"type", "player", "mask", "minvalue", "maxvalue", "defvalue", "value"}) do
+                        local success, value = pcall(function() return field[property] end)
+                        if success and (type(value) == "number" or type(value) == "string" or type(value) == "boolean") then
+                            entry[property] = value
+                        end
+                    end
+                    for _, method in ipairs({"set_value", "set_user_settings"}) do
+                        local success, value = pcall(function() return field[method] end)
+                        entry[method .. "_available"] = success and type(value) == "function"
+                    end
+                    fields[#fields + 1] = entry
+                end
+            end)
+            result[#result + 1] = {tag = tostring(tag), fields = fields}
+        end
+    end)
+    return result
+end
+
 local function respond(id, ok, info, err)
     local response = {id = id, ok = ok}
     if ok then response.info = info else response.error = tostring(err or "Unknown error") end
@@ -79,6 +108,8 @@ local function execute(action)
                 completed_frames = completed_frames,
                 single_step_flag = manager.ui.single_step,
                 step_pending = pending_step ~= nil}
+    elseif action == "input_capabilities" then
+        return {ports = input_capabilities()}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
