@@ -47,6 +47,22 @@ python -m gameframe.ioquake3_v4_production_cli docs/examples/quake_v7_targeted_l
 
 **Avoid re-recording 192 images until visual composition looks correct.** For a separate V6 film output, use a new `--output-dir` and the reviewed production JSON.
 
+## Phase 1b: six-frame visual scout after wall obstruction was confirmed
+
+User visually confirmed **HUD hidden, camera looking into a wall** for placeholder target `300 2400 60` from `212 2360 56`. The placeholder target is not a verified visible subject. Don't record another 192-frame movie using it.
+
+Use a live, V4-patched ioquake3 engine with the native V2 cgame module, bridge and cinematic launch flags from above. Scout **six camera origins** around the previous test position and aim each at the test target; inspect the saved JPEGs manually. Positions may intersect map geometry; **the scout does not guarantee clearance**.
+
+```powershell
+cd "D:\AI\Game Frame\Game-frame"
+git pull origin main
+python -m unittest discover -s tests -v
+python -m gameframe.ioquake3_v7_scout --dir "D:\AI\Game Frame\ioq3-camera-bridge" --screenshot-dir "D:\AI\Game Frame\ioq3-v2-home\baseq3\screenshots" --output-dir "output\v7_scout_01" --origin 212 2360 56 --target 300 2400 60 --offset 32
+Get-ChildItem "output\v7_scout_01"
+```
+
+This generates `01_origin.jpg`, `02_left.jpg`, `03_right.jpg`, `04_back.jpg`, `05_forward.jpg`, `06_up.jpg` and `scout.json`. Choose the best visibly clear image, or report if all are blocked. Use a new output directory per attempt. The next engineering step is **real scene geometry raycasting**, not treating a visually selected sample as proof of collision-free camera travel.
+
 ## Phase 2 planned
 
 - Engine-coupled render-time camera timeline and direct framebuffer capture, replacing per-frame screenshots.
