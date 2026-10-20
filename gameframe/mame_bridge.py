@@ -15,7 +15,7 @@ import re
 import time
 import uuid
 
-_ALLOWED = {"status", "pause", "resume", "step_once", "reset_step_tracking", "list_inputs", "input_capabilities", "snapshot", "record_start", "record_stop"}
+_ALLOWED = {"status", "pause", "resume", "step_once", "reset_step_tracking", "list_inputs", "input_capabilities", "set_paddle", "snapshot", "record_start", "record_stop"}
 _SAFE_ID = re.compile(r"^[a-f0-9]{32}$")
 
 
@@ -29,14 +29,21 @@ class MameBridge:
         if self.timeout <= 0:
             raise ValueError("timeout must be positive")
 
-    def request(self, action: str) -> dict:
+    def request(self, action: str, **params) -> dict:
+        if action == "set_paddle":
+            if type(params.get("paddle")) is not int or params["paddle"] not in (0, 1):
+                raise ValueError("paddle must be 0 or 1")
+            if type(params.get("value")) is not int or not 0 <= params["value"] <= 255:
+                raise ValueError("value must be an integer from 0 to 255")
+        elif params:
+            raise ValueError("This action accepts no parameters")
         if action not in _ALLOWED:
             raise ValueError(f"Unsupported MAME action: {action}")
         if not self.directory.is_dir():
             raise FileNotFoundError(f"MAME bridge directory missing: {self.directory}")
         request_id = uuid.uuid4().hex
         assert _SAFE_ID.fullmatch(request_id)
-        command = {"id": request_id, "action": action}
+        command = {"id": request_id, "action": action, **params}
         request_path = self.directory / f"request_{request_id}.json"
         response_path = self.directory / f"response_{request_id}.json"
         with NamedTemporaryFile("w", encoding="utf-8", dir=self.directory,
