@@ -60,8 +60,20 @@ def main(argv=None) -> int:
     p.add_argument("plan", type=Path)
     p.add_argument("--baseq3", type=Path, default=Path(r"D:\AI\Game Frame\ioquake3\baseq3"))
     p.add_argument("--write", action="store_true")
+    p.add_argument("--where", nargs=3, type=float, metavar=("X", "Y", "Z"),
+                   help="Replace all sample positions with a safe point measured using /where")
     args = p.parse_args(argv)
     plan = parse_plan(json.loads(args.plan.read_text(encoding="utf-8")))
+    if args.where is not None:
+        from .engines import CinematicPlan, ShotCommand
+        if any(not math.isfinite(n) or abs(n) > 100000 for n in args.where):
+            raise ValueError("--where coordinates must be finite")
+        plan = CinematicPlan(plan.title, plan.fps, plan.duration_frames,
+            tuple(ShotCommand(c.frame, c.operation,
+                {**c.arguments, "position": list(args.where)}) if c.operation == "set_camera"
+                else c for c in plan.commands))
+    elif args.write:
+        raise ValueError("Refusing to write arbitrary sample camera positions; supply --where X Y Z from your live map")
     takes = camera_takes(plan)
     for number, (frame, command) in enumerate(takes, start=1):
         print(f"Take {number} / planned frame {frame}: {command}")
