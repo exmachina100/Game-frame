@@ -74,7 +74,7 @@ def sample(take:Take,at:float,*,ease:bool=True)->Pose:
 
 def run_take(take:Take,bridge:IoQuake3RenderCamera|None=None,*,rate:float=8,
              live:bool=False,allow_translation:bool=False,ease:bool=True,
-             clock=time.monotonic,sleep=time.sleep)->dict:
+             clock=time.monotonic,sleep=time.sleep,reset_after:bool=True)->dict:
     if type(rate) not in (int,float) or not math.isfinite(rate) or not 1<=rate<=15:
         raise ValueError("Rate must be between 1 and 15 Hz")
     if live and bridge is None:
@@ -107,7 +107,7 @@ def run_take(take:Take,bridge:IoQuake3RenderCamera|None=None,*,rate:float=8,
     finally:
         # Reset on interrupted playback as well as ordinary completion, but only
         # when this controller owns the active bridge and a live run was requested.
-        if live and bridge is not None:
+        if live and bridge is not None and reset_after:
             try: bridge.reset()
             except Exception: pass
     return {"schema":"gameframe.v3.take_manifest.v1","name":take.name,"mode":"live" if live else "dry_run",
