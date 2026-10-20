@@ -78,7 +78,7 @@ def patch_client(source: str) -> str:
     return source.replace(anchor,CLIENT_BRANCH+"\n"+anchor,1)
 
 def patch_cgame(source: str) -> str:
-    if V2_CGAME_MARKER in source:
+    if V2_CGAME_MARKER in source or "/* GAMEFRAME_V2_CGAME: renderer-only detached viewpoint. */" in source:
         raise ValueError("V2 cgame already patched")
     anchor='static int CG_CalcViewValues( void ) {'
     target='\tinwater = CG_CalcViewValues();'
