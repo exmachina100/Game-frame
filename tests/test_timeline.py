@@ -27,6 +27,24 @@ class FakeBridge:
 
 
 class TimelineTests(unittest.TestCase):
+    def test_record_failure_writes_manifest_and_keeps_original_error(self):
+        class BrokenRecorder(FakeBridge):
+            def request(self, action, **kwargs):
+                if action == "status" and not self.paused:
+                    raise TimeoutError("simulated stalled recorder")
+                if action == "pause" and not self.paused:
+                    self.paused = True
+                    raise TimeoutError("simulated cleanup failure")
+                return super().request(action, **kwargs)
+        with TemporaryDirectory() as tmp:
+            path = Path(tmp) / "failed.json"
+            with self.assertRaisesRegex(TimeoutError, "stalled recorder"):
+                play_timeline(BrokenRecorder(), [Beat("test", 10, 128, 128)], record=True, manifest=path)
+            report = json.loads(path.read_text())
+            self.assertFalse(report["complete"])
+            self.assertIn("stalled recorder", report["error"])
+            self.assertTrue(report["cleanup_errors"])
+
     def test_validation(self):
         for value in (-1, 256, True, 1.5):
             with self.assertRaises(ValueError):
