@@ -28,7 +28,7 @@ class RenderCameraTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path=Path(folder)/"code/cgame/cg_view.c"
             path.parent.mkdir(parents=True)
-            original="static int CG_CalcViewValues( void ) {return 0;}\\n\\tinwater = CG_CalcViewValues();"
+            original="static int CG_CalcViewValues( void ) {return 0;}\n\tinwater = CG_CalcViewValues();"
             patched=patch_cgame(original)
             unguarded=patched.replace("#ifndef Q3_VM\\n","").replace("#endif /* !Q3_VM */\\n","").replace("\\n#endif","")
             path.write_text(unguarded)
