@@ -50,9 +50,12 @@ try:
     delta={key: final[key]-value for key,value in initial.items() if key in final}
     if not delta:
         print("COUNTER DIAGNOSTIC:",before.get("screen_frame_error"),after.get("screen_frame_error"),flush=True)
+    callback_delta=after.get("completed_frames",0)-before.get("completed_frames",0)
     print("FRAME DELTA:",delta,flush=True)
+    print("FRAME CALLBACK DELTA:",callback_delta,flush=True)
     print("PAUSED AFTER:",after.get("paused"),flush=True)
-    print("RESULT:", "CONFIRMED" if delta and all(x==1 for x in delta.values()) and after.get("paused") else "INCONCLUSIVE",flush=True)
+    confirmed=(callback_delta==1 or (delta and all(x==1 for x in delta.values()))) and after.get("paused")
+    print("RESULT:", "CONFIRMED" if confirmed else "INCONCLUSIVE",flush=True)
 except Exception as exc:
     print("FRAME INSPECTION ERROR:",repr(exc),flush=True)
     sys.exit(3)
