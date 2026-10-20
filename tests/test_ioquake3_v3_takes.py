@@ -48,6 +48,12 @@ class V3TakesTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"Translation"):
             run_take(other)
 
+    def test_repository_example_is_valid(self):
+        example = Path(__file__).resolve().parents[1] / "docs/examples/quake_v3_opening.json"
+        take = load_take(example)
+        self.assertEqual(take.keyframes[-1].time, 12)
+        self.assertEqual(run_take(take)["sample_count"], 97)
+
     def test_json_validation(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/"take.json"
