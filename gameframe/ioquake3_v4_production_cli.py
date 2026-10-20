@@ -27,13 +27,16 @@ def main(argv=None):
     production=load_production(args.production)
     bridge=IoQuake3ProductionBridge(args.dir) if args.run else None
     result=run_production(production,bridge,live=args.run,rate=args.rate,
-                          allow_translation=args.allow_translation,capture=args.capture,\n                          screenshot_dir=args.screenshot_dir,output_dir=args.output_dir,\n                          capture_timeout=args.capture_timeout)
+                          allow_translation=args.allow_translation,capture=args.capture,
+                          screenshot_dir=args.screenshot_dir,output_dir=args.output_dir,
+                          capture_timeout=args.capture_timeout)
     args.manifest.parent.mkdir(parents=True,exist_ok=True)
     args.manifest.write_text(json.dumps(result,indent=2)+"\n",encoding="utf-8")
     print(json.dumps({"name":result["name"],"mode":result["mode"],
                       "status":result["status"],"shots":len(result["shots"]),
                       "queued":sum(x["camera"]["queued_count"] for x in result["shots"]),
                       "capture_requests":sum(len(x["captures"]) for x in result["shots"]),
-                      "capture_files_verified":result["capture_files_verified"],"manifest":str(args.manifest),\n                      "output_dir":result["output_dir"]},indent=2))
+                      "capture_files_verified":result["capture_files_verified"],"manifest":str(args.manifest),
+                      "output_dir":result["output_dir"]},indent=2))
 
 if __name__=="__main__":main()
