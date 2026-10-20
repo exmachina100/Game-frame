@@ -90,7 +90,7 @@ local function respond(id, ok, info, err)
     assert(moved, "Cannot publish MAME response: " .. tostring(why))
 end
 
-local function execute(action)
+local function execute(action, request)
     if action == "status" then
         local frames, frame_error = frame_counter()
         if pending_step and manager.machine.paused then
@@ -110,6 +110,19 @@ local function execute(action)
                 step_pending = pending_step ~= nil}
     elseif action == "input_capabilities" then
         return {ports = input_capabilities()}
+    elseif action == "set_paddle" then
+        local paddle = request.paddle
+        local value = request.value
+        if type(paddle) ~= "number" or (paddle ~= 0 and paddle ~= 1) then error("paddle must be 0 or 1") end
+        if type(value) ~= "number" or value ~= math.floor(value) or value < 0 or value > 255 then error("value must be an integer from 0 to 255") end
+        local tag = paddle == 0 and ":PADDLE0" or ":PADDLE1"
+        local port = manager.machine.ioport.ports[tag]
+        if not port then error("Pong paddle port not found: " .. tag) end
+        local target = paddle == 0 and "Paddle" or "Paddle 2"
+        local field = port.fields[target]
+        if not field or type(field.set_value) ~= "function" then error("Pong paddle set_value unavailable") end
+        field:set_value(value)
+        return {paddle = paddle, requested_value = value, port = tag, applied = true}
     elseif action == "list_inputs" then
         return {ports = input_catalog()}
     elseif action == "pause" then
@@ -163,7 +176,7 @@ local function poll()
                 local valid, request = pcall(json.parse, payload)
                 if valid and type(request) == "table" and request.id == id
                    and type(request.action) == "string" then
-                    local success, result = pcall(execute, request.action)
+                    local success, result = pcall(execute, request.action, request)
                     if success then
                         respond(id, true, result, nil)
                     else
