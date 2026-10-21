@@ -57,13 +57,17 @@ class SceneProbe:
             except PermissionError:
                 if time.monotonic()>=deadline:raise
                 time.sleep(.025)
+        sent=False
         try:
             with tmp.open("x",encoding="ascii") as f:f.write("gfscene\n")
             os.replace(tmp,req)
+            sent=True
             while time.monotonic()<deadline:
                 try:
                     if reply.exists():
                         payload=reply.read_text(encoding="ascii")
+                        if payload.strip() == "REJECTED":
+                            raise RuntimeError("Native engine rejected gfscene; verify Stage 2 patch, rebuild and active EXE")
                         parsed=parse_scene(payload)
                         try:reply.unlink()
                         except PermissionError:pass
@@ -75,3 +79,8 @@ class SceneProbe:
             raise TimeoutError("No complete scene snapshot response; rebuild modified native client")
         finally:
             tmp.unlink(missing_ok=True)
+            # Own request only: a timed-out probe must not poison the next attempt.
+            # Never clear requests present before this probe started.
+            if sent:
+                try: req.unlink(missing_ok=True)
+                except PermissionError: pass
